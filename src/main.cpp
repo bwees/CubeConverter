@@ -1,18 +1,12 @@
 #include <Arduino.h>
-/* first argument specifies cube side (in this case it is a 4x4x4 cube),
-second the number of channels (colors for each LED)
-third the resolution of each color (in this case 1 is just on/off)
-last argument sets the speed at which the loop function is called
 
-for debugging reasons the last argument is set to 256, a quite low setting, increase
-it as much as possible while still being able to stream frames to the cube */
 
 // #define CONTROL_TYPE_LOADED_ANIMATION
 #define CONTROL_TYPE_SERIAL
 
 #ifdef CONTROL_TYPE_SERIAL
     #include <QuadrumSerial.h>
-    QuadrumSerial cube(8, 1, 1, 256);
+    QuadrumSerial cube(8, 1, 1, 500);
 #endif
 
 #ifdef CONTROL_TYPE_LOADED_ANIMATION
@@ -24,24 +18,46 @@ it as much as possible while still being able to stream frames to the cube */
 
 bool cubeData[512];
 
+
 void setup() {
     Serial.begin(115200);
-    Serial1.begin(250000);
+    Serial2.begin(250000);
 
     cube.start(); // must be the last call inside setup function
 }
 
-int y = 0;
 void loop() {
-    // load frame into cubeData
+
+
+    // // load frame into cubeData
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
+
+            char rowByte = 0;
+
             for (int z = 0; z < 8; z++) {
-                int index = (y * 64) + (z * 8) + x;
-                cubeData[index] = cube.getVoxelState(x, y, z); // returns true if voxel at x, y and z is on, otherwise returns false
+                bool state = cube.getVoxelState(x, y, z); // returns true if voxel at x, y and z is on, otherwise returns false
+                rowByte |= (state << z);
             }
+
+            Serial2.write(rowByte);
         }
     }
+    // delay(1000);
 
-    // send frame to cube
+    // // // load frame into cubeData
+    // for (int y = 0; y < 8; y++) {
+    //     for (int x = 0; x < 8; x++) {
+
+    //         char rowByte = 0;
+
+    //         for (int z = 0; z < 8; z++) {
+    //             bool state = cube.getVoxelState(x, y, z); // returns true if voxel at x, y and z is on, otherwise returns false
+    //             rowByte |= (state << z);
+    //         }
+
+    //         Serial2.write(0x00);
+    //     }
+    // }
+    // delay(1000);
 }
