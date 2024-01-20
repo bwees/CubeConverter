@@ -1,6 +1,6 @@
 import serial
 import time
-from math_functions import *
+from python_control.math_functions import *
 
 # Open serial port
 ser = serial.Serial('/dev/cu.usbserial-A50285BI', 250000)
